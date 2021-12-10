@@ -1,6 +1,9 @@
 use std::env;
 use std::fs;
 use std::panic;
+
+
+#[derive(Debug)]
 enum TokenKind {
     Identifier,
 
@@ -10,7 +13,7 @@ enum TokenKind {
 
     String,
 }
-
+#[derive(Debug)]
 struct Token {
     kind: TokenKind,
 
@@ -39,17 +42,107 @@ impl Lexer {
     }
 
     pub fn lex(&mut self) {
-        let tokens: Vec<Token> = Vec::new();
+        let mut tokens: Vec<Token> = Vec::new();
 
         while self.source.len() > self.counter {
 
+            let mut c = self.current_char();
 
-            
 
+            match  c {
+                
+                '=' => {
+
+                    tokens.push(Token::new(TokenKind::Assign, "=".to_owned()));
+
+                    self.counter += 1
+
+
+                },   
+                
+                
+                '\''| '"'=>{
+
+                    self.counter += 1;
+
+
+
+                    let mut buffer : String = String::new();
+
+
+                    while self.current_char() != c{
+
+
+                        buffer.push(self.current_char());
+
+                        self.counter +=1 ;
+
+
+
+                    }
+
+                    self.counter +=1 ;
+
+                    tokens.push(Token::new(TokenKind::String, buffer));
+
+                },
+
+                _ if c.is_alphabetic() => {
+
+                    let mut buffer:String = String::new();
+
+
+                    buffer.push(c);
+
+                    self.counter +=1 ;
+
+
+                    while self.current_char().is_alphabetic(){
+
+                        buffer.push(self.current_char());
+
+                        self.counter += 1 ;
+
+                    }
+
+                    let kind : TokenKind = match buffer.as_str(){
+
+                        "let" => {
+                            TokenKind::Let
+                        },
+                        _ => TokenKind::Identifier,
+
+                    };
+
+                    tokens.push(Token::new(kind,buffer));
+                }
+
+                _=> {
+
+                    self.counter += 1
+
+
+                }
+
+            }
 
 
         }
+
+        println!("{:?}",tokens);
     }
+
+
+    pub fn current_char(&self)-> char{
+
+        *self.source.get(self.counter).unwrap()
+
+
+
+    }
+
+
+
 }
 fn main() {
     let maybe_file = env::args().nth(1);
